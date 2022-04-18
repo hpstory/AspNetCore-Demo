@@ -1,0 +1,72 @@
+﻿{
+  "Comments": [
+    "Nuget install below packages to support this configuration:",
+    "Serilog.Sinks.Console",
+    "Serilog.Sinks.File",
+    "Serilog.Enrichers.Thread"
+  ],
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console",
+      "Serilog.Sinks.File",
+      "Serilog.Enrichers.Thread"
+    ],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Information",
+        "Microsoft.AspNetCore.Server.Kestrel": "Warning",
+        "Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager": "Warning",
+        "Microsoft.AspNetCore.Mvc.Internal": "Warning",
+        "Microsoft.AspNetCore.Authentication": "Warning",
+        "Microsoft.AspNetCore.Hosting.Internal.WebHost": "Warning",
+        "Microsoft.AspNetCore.Hosting": "Warning",
+        "Microsoft.AspNetCore.Routing.EndpointMiddleware": "Warning",
+        "Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware": "Warning",
+        "Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor": "Warning",
+        "Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker": "Warning",
+        "Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor": "Warning",
+        "System": "Warning"
+      }
+    },
+    "Enrich": [ "FromLogContext", "WithThreadId" ],
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact",
+          "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss,fff zzz}] [{Level:u4}] [{SourceContext:l}] {Message:lj}{NewLine}{Exception}",
+          "restrictedToMinimumLevel": "Verbose"
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "Logs/log_.log",
+          "IncludeScopes": true,
+          "rollingInterval": "Day",
+          "fileSizeLimitBytes": 10485760,
+          "rollOnFileSizeLimit": true,
+          "shared": true,
+          "retainedFileCountLimit": 30,
+          "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss,fff zzz}] [{Level:u4}] [{Environment}:{Logger}] {Message:lj}{NewLine}{Exception}",
+          "restrictedToMinimumLevel": "Verbose"
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "Logs/fluentlog_.log",
+          "IncludeScopes": true,
+          "rollingInterval": "Day",
+          "fileSizeLimitBytes": 10485760,
+          "rollOnFileSizeLimit": true,
+          "shared": true,
+          "retainedFileCountLimit": 30,
+          "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact",
+          "restrictedToMinimumLevel": "Verbose"
+        }
+      }
+    ]
+  }
+}
