@@ -22,7 +22,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.UseMiddleware<MyMiddleware>();
-app.UseMiddleware<RequestLimitingMiddleware>();
+app.UseRequestLimitingMiddleware();
+// app.UseMiddleware<RequestLimitingMiddleware>();
 app.MapControllers();
 
 app.Run();
