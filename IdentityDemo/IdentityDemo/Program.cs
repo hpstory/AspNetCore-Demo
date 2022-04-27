@@ -1,6 +1,10 @@
 using IdentityDemo;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +36,45 @@ IdentityBuilder identityBuilder = new IdentityBuilder(typeof(User), typeof(Role)
 identityBuilder.AddEntityFrameworkStores<DemoDbContext>().AddDefaultTokenProviders()
     .AddUserManager<UserManager<User>>().AddRoleManager<RoleManager<Role>>();
 
+builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection("JWT"));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(x =>
+{
+    var jwtOpt = builder.Configuration.GetSection("JWT").Get<JWTOptions>();
+    byte[] keyBytes = Encoding.UTF8.GetBytes(jwtOpt.SigningKey);
+    var secKey = new SymmetricSecurityKey(keyBytes);
+    x.TokenValidationParameters = new()
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = secKey
+    };
+});
+
+builder.Services.AddSwaggerGen(c =>
+{
+    var schema = new OpenApiSecurityScheme()
+    {
+        Description = "Authorization Header",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Authorization"
+        },
+        Scheme = "OAuth2.0",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    };
+
+    c.AddSecurityDefinition("Authorization", schema);
+    var requirement = new OpenApiSecurityRequirement();
+    requirement[schema] = new List<string>();
+    c.AddSecurityRequirement(requirement);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,6 +85,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
